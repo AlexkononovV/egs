@@ -68,6 +68,7 @@ async def post_book(book: schemas.BookSchema,db=Depends(db)):
     #book = crud.save_book(db, book)
     print(book)
     book2 = await crud.save_book(db, book)
+    print(book2)
     if book2 is None:
         raise HTTPException(status_code=404, detail="Unknown Author id")
     return book2

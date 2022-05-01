@@ -10,15 +10,27 @@ async def get_books(db:Session, title: str=None, author: str = None):
     #return db.query(models.Book).filter(models.Book.title == title).filter(models.Book.categories_id == category).filter(models.Book.authors_id == author)
     
     #books = db.query(models.Book).all()
+    query = select(models.Book).options(joinedload(models.Book.authors))
     books = await db.execute(select(models.Book).options(joinedload(models.Book.authors)))    
     if title is not None:
-        books=books.filter(models.Book.title == title)
-    if author is not None:
-        books = books.filter(models.Book.authors_id == author)
+        query = select(models.Book).options(joinedload(models.Book.authors)).where(models.Book.title.contains(title))
+    books = await db.execute(query)
     books = books.scalars().unique()
+    if author is not None:
+        books2=[]
+        #authors = await db.execute(select(models.Author).where(models.Author.name.contains(author)))
+        #authors = authors.scalars().all()
+        #authors_ids = [a.id for a in authors]
+        #query = select(models.Book).options(joinedload(models.Book.authors)).join(models.book_authors, models.book_authors.c.book_id == models.Book.book_id).where(authors_ids in models.book_authors.c.author_id )
+        for b in books:
+            for a in b.authors:
+                if author in a.name:
+                    books2.append([schemas.BookSchema(book_id=b.book_id, title=b.title, date=b.date, amount_in_stock=b.amount_in_stock, amount_reserved=b.amount_reserved, authors=b.authors)])
+        if books2!=[]:
+            return books2
     #return [schemas.BookSchema(book_id=b.book_id,title=b.title, date=b.date, amount_in_stock=b.amount_in_stock, amount_reserved=b.amount_reserved, authors=b.authors) for b in books]
-    return  [b for b in books]
-    
+    return  [ schemas.BookSchema(book_id=b.book_id, title=b.title, date=b.date, amount_in_stock=b.amount_in_stock, amount_reserved=b.amount_reserved, authors=b.authors) for b in books]
+  
 async def get_book_id(db:Session, id :int=None ):
     if id is None:
         return db.query(models.Book).all()
@@ -36,15 +48,18 @@ async def save_book(db: Session, info: schemas.BookSchema):
     authors = []
     for id in ids:
         a = await db.execute(select(models.Author).where(models.Author.id == id))
-        if a.scalars().first() is None:
+        a= a.scalars().first()
+        if a is None:
             return None
         authors.append(a)
+    
     book = models.Book(book_id=b['book_id'], title=b['title'], date=b['date'], amount_in_stock=b['amount_in_stock'], amount_reserved=b['amount_reserved'])
     book.authors = authors
     db.add(book)
 
     await db.commit()
     await db.refresh(book)
+    
     return book
 
 async def delete_book(db: Session, id:int):
@@ -115,17 +130,20 @@ async def delete_author(db: Session, id:int):
     #author = db.execute(select(models.Author).where(models.Author.id==id))
     #author = author.scalar_one()
     #await db.delete(author)
+    query = delete(models.book_authors).where(models.book_authors.c.author_id == id)
+    await db.execute(query)
     query = delete(models.Author).where(models.Author.id == id)
     await db.execute(query)
     await db.commit()
+
     return "Deleted Successfully"
 
 async def get_author(db:Session, name: str = None, id: int =None):
     authors = await db.execute(select(models.Author)) #db.query(models.Author).all()
     if name is not None:
-        authors = db.query(models.Author).filter(models.Author.name == name)
+        authors = await db.execute(select(models.Author).where(models.Author.name.contains(name))) #db.execute(select(models.Author).where(models.Author.name == name))
     if id is not None:
-        authors = db.query(models.Author).filter(models.Author.id == id)
+        authors = await db.execute(select(models.Author).filter(models.Author.id == id))
     authors = authors.scalars().all()
     return [schemas.AuthorBase(id=a.id,name=a.name) for a in authors]
 ############################
