@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from datetime import date 
 
 
-class Author(BaseModel):
+class AuthorBase(BaseModel):
 
     id: int
     name: str
@@ -14,12 +14,13 @@ class Author(BaseModel):
     class Config:
         orm_mode = True
 
-class Category(BaseModel):
+'''class Category(BaseModel):
 
     id: int
     name: str
     class Config:
         orm_mode = True
+'''
 '''class Publisher(BaseModel):
 
     id: int
@@ -29,9 +30,10 @@ class Category(BaseModel):
 '''
 class User(BaseModel):
 
-    user_id: Optional[int] 
-    email: Optional[str] 
+    user_id: int 
+    email: str
     name: Optional[str] 
+    is_active : Optional[bool]
     class Config:
         orm_mode = True
 
@@ -47,29 +49,25 @@ class Order(BaseModel):
     end_date: Optional[date] 
     complete: Optional[bool] 
     class Config:
-        orm_mode = True
+        orm_mode = True 
 
 
-class Book(BaseModel):
+class BookBase(BaseModel):
 
     book_id: int
-    name: str
+    title: str
     date: Optional[date] 
     amount_in_stock: int
     amount_reserved: int
-    publisher: Optional[str] 
-    authors: List[Author]
-    categories: List[Category]
-    
-    orders: Optional[List[Order]]
+
     class Config:
         orm_mode = True
 
+class BookSchema(BookBase):
+    authors: List[AuthorBase]
 
-
-    #edition: Optional[str] 
-
-    
+class AuthorSchema(AuthorBase):
+    books: List[BookBase]  
 
 
 class ApiResponse(BaseModel):

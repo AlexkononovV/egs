@@ -4,21 +4,20 @@ from . import models
 import array 
 from sqlalchemy.future import select
 from sqlalchemy import delete
+from sqlalchemy.orm import selectinload,joinedload
 
-async def get_books(db:Session, title: str=None, author: str = None, category:str = None):
+async def get_books(db:Session, title: str=None, author: str = None):
     #return db.query(models.Book).filter(models.Book.title == title).filter(models.Book.categories_id == category).filter(models.Book.authors_id == author)
     
     #books = db.query(models.Book).all()
-    books = await db.execute(select(models.Book))
-    
+    books = await db.execute(select(models.Book).options(joinedload(models.Book.authors)))    
     if title is not None:
         books=books.filter(models.Book.title == title)
     if author is not None:
         books = books.filter(models.Book.authors_id == author)
-    if category is not None:
-        books = books.filter(models.Book.categories_id == category)
-
-    return books.scalars().all() #books #.all()
+    books = books.scalars().unique()
+    #return [schemas.BookSchema(book_id=b.book_id,title=b.title, date=b.date, amount_in_stock=b.amount_in_stock, amount_reserved=b.amount_reserved, authors=b.authors) for b in books]
+    return  [b for b in books]
     
 async def get_book_id(db:Session, id :int=None ):
     if id is None:
@@ -27,9 +26,23 @@ async def get_book_id(db:Session, id :int=None ):
         return db.query(models.Book).filter(models.Book.book_id==id)
 
 
-async def save_book(db: Session, info: schemas.Book):
-    book = models.Book(**info.dict())
+async def save_book(db: Session, info: schemas.BookSchema):
+    b = info.dict()
+    #book = models.Book(**info.dict()) 
+    #db.add(book)
+    
+    auths = b['authors']
+    ids = [a['id'] for a in auths]
+    authors = []
+    for id in ids:
+        a = await db.execute(select(models.Author).where(models.Author.id == id))
+        if a.scalars().first() is None:
+            return None
+        authors.append(a)
+    book = models.Book(book_id=b['book_id'], title=b['title'], date=b['date'], amount_in_stock=b['amount_in_stock'], amount_reserved=b['amount_reserved'])
+    book.authors = authors
     db.add(book)
+
     await db.commit()
     await db.refresh(book)
     return book
@@ -90,7 +103,7 @@ def delete_order(db: Session, id:int):
 
 ################################
 
-async def save_author(db: Session, info: schemas.Author):
+async def save_author(db: Session, info: schemas.AuthorBase):
     author = models.Author(**info.dict())
     db.add(author)
     await db.commit()
@@ -114,28 +127,30 @@ async def get_author(db:Session, name: str = None, id: int =None):
     if id is not None:
         authors = db.query(models.Author).filter(models.Author.id == id)
     authors = authors.scalars().all()
-    return [schemas.Author(id=a.id,name=a.name) for a in authors]
+    return [schemas.AuthorBase(id=a.id,name=a.name) for a in authors]
 ############################
-
-def get_category(db:Session, name: str = None, id: int =None):
-    cat= db.query(models.Category).all()
+'''
+async def get_category(db:Session, name: str = None, id: int =None):
+    cat= await db.execute(select(models.Category))
     if name is not None:
         cat= db.query(models.Category).filter(models.Category.name == name)
     if id is not None:
         cat=  db.query(models.Category).filter(models.Category.id == id)
-    return cat
-def save_category(db: Session, info: schemas.Category):
+    cat = cat.scalars().all()
+    return [schemas.Category(id=c.id, name=c.name) for c in cat]
+async def save_category(db: Session, info: schemas.Category):
     cat = models.Category(**info.dict())
     db.add(cat)
-    db.commit()
-    db.refresh(cat)
+    await db.commit()
+    await db.refresh(cat)
     return cat
 
-def delete_category(db: Session, id:int):
-    db.query(models.Category).filter(models.Category.id==id).delete()
-    db.commit()
+async def delete_category(db: Session, id:int):
+    query = delete(models.Category).where(models.Category.id == id)
+    await db.execute(query)
+    await db.commit()
     return "Deleted Successfully"
-
+'''
 #######################################
 '''def get_publisher(db:Session, name: str = "", id: int =None):
     if id is None:
