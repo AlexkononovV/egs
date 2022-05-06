@@ -15,7 +15,7 @@ from .database import SessionLocal, engine
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.cors import CORSMiddleware
 
 #models.Base.metadata.create_all(bind=engine)
 
