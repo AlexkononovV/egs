@@ -32,10 +32,14 @@ async def get_books(db:Session, title: str=None, author: str = None):
     return  [ schemas.BookSchema(book_id=b.book_id, title=b.title, date=b.date, amount_in_stock=b.amount_in_stock, amount_reserved=b.amount_reserved, authors=b.authors) for b in books]
   
 async def get_book_id(db:Session, id :int=None ):
-    if id is None:
-        return db.query(models.Book).all()
+    
+    if id is not None:
+        book = await db.execute(select(models.Book).options(joinedload(models.Book.authors)).filter(models.Book.book_id == id))
+        books = book.scalars().unique()
+        return [ schemas.BookSchema(book_id=b.book_id, title=b.title, date=b.date, amount_in_stock=b.amount_in_stock, amount_reserved=b.amount_reserved, authors=b.authors) for b in books]
+  
     else:
-        return db.query(models.Book).filter(models.Book.book_id==id)
+        return None
 
 
 async def save_book(db: Session, info: schemas.BookSchema):
@@ -63,9 +67,12 @@ async def save_book(db: Session, info: schemas.BookSchema):
     return book
 
 async def delete_book(db: Session, id:int):
-    db.query(models.Book).filter(models.Book.book_id==id).delete()
+    query = delete(models.book_authors).where(models.book_authors.c.book_id == id)
+    await db.execute(query)
+    query= delete(models.Book).where(models.Book.book_id==id)
+    await db.execute(query)
     await db.commit()
-    return 
+    return "Delted Successfully"
 
 def udpate_book( db:Session, id:int, stock:int, booked:int, name:str=""):
     b = db.query(models.Book).filter(models.Book.book_id==id)
@@ -79,37 +86,56 @@ def udpate_book( db:Session, id:int, stock:int, booked:int, name:str=""):
     db.commit()
 
 ##########################
-
+'''
 def get_order_id(db:Session, id :int=None ):
     if id is None:
         return db.query(models.Order).all()
     else:
         return db.query(models.Order).filter(models.Order.id==id)
-
-def get_orders(db:Session, book_id: int = None, book_title: str =None, requester: int = None,status: str=None, begin_date: str=None, end_date: str=None):
+'''
+async def get_orders(db:Session, book_id: int = None, book_title: str =None, requester: int = None,status: str=None, begin_date: str=None, end_date: str=None):
     
-    orders = db.query(models.Order).all()
+    query = select(models.Order)
+
     if book_id is not None:
-        orders=orders.filter(models.Order.book_id == book_id)
-    if book_title is not None:
-        orders=orders.filter(models.Order.book_id == book_id)
+        query=select(models.Order).where(models.Order.book_id == book_id)
+    #if book_title is not None:
+    #    orders=orders.filter(models.Order.book_id == book_id)
     if requester is not None:
-        orders=orders.filter(models.Order.requester_id == requester)
+        query=select(models.Order).where(models.Order.requester_id == requester)
     if status is not None:
-        orders=orders.filter(models.Order.status == status)
+        query=select(models.Order).where(models.Order.status == status)
     if begin_date is not None:
-        orders=orders.filter(models.Order.begin_date == begin_date)
+        query=select(models.Order).where(models.Order.begin_date == begin_date)
     if end_date is not None:
-        orders=orders.filter(models.Order.end_date == end_date)
+        query=select(models.Order).where(models.Order.end_date == end_date)
+
+    orders = await db.execute(query)
+    orders = orders.scalars().all()
+    
     return orders
 
-def save_order(db: Session, info: schemas.Order):
-    order = models.Order(**info.dict())
-    db.add(order)
-    db.commit()
-    db.refresh(order)
-    return order
+async def save_order(db: Session, info: schemas.Order):
+    #order = models.Order(**info.dict())
+    
+    o = info.dict()
+    book = o['book_id']
+    user = o['requester_id']
+    book = await db.execute(select(models.Book).where(models.Book.book_id == book))
+    book=book.scalars().first()
+    if book is None:
+        return None
+    user = await db.execute(select(models.User).where(models.User.user_id == user))
+    user=user.scalars().first()
+    if user is None:
+        return None
 
+    order = models.Order(id=o['id'], book_id=o['book_id'],requester_id=o['requester_id'],status=o['status'],begin_date=o['begin_date'],end_date=o['end_date'], complete=o['complete']) 
+
+    db.add(order)
+    await db.commit()
+    await db.refresh(order)
+    return order
 
 def delete_order(db: Session, id:int):
     db.query(models.Order).filter(models.Order.id==id).delete()
@@ -147,6 +173,28 @@ async def get_author(db:Session, name: str = None, id: int =None):
     authors = authors.scalars().all()
     return [schemas.AuthorBase(id=a.id,name=a.name) for a in authors]
 ############################
+
+async def get_user(db:Session, id: int =None):
+    users = await db.execute(select(models.User)) #db.query(models.Author).all()
+    if id is not None:
+        users = await db.execute(select(models.User).filter(models.User.user_id == id))
+    users = users.scalars().all()
+    return [schemas.User(user_id=a.user_id,email=a.email, name=a.name, is_active=a.is_active) for a in users]
+
+async def save_user(db: Session, info: schemas.User):
+    user = models.User(**info.dict())
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+async def delete_user(db: Session, id:int):
+    query = delete(models.User).where(models.User.user_id == id)
+    await db.execute(query)
+    await db.commit()
+
+    return "Deleted Successfully"
+
 '''
 async def get_category(db:Session, name: str = None, id: int =None):
     cat= await db.execute(select(models.Category))

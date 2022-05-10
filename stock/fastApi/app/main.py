@@ -74,8 +74,7 @@ async def read_book( bookId: int,db=Depends(db)):
 @app.post('/v1/books')
 #def save_books(db=Depends(db), book_id: int, name: str,mount_in_stock:int, amount_reserved: int,date:Optional[str], authors: List[schemas.Author], categories:List[schemas.Category], orders: Optional[List[schemas.Order]] ):
 async def post_book(book: schemas.BookSchema,db=Depends(db)):
-    #book = crud.save_book(db, book)
-    print(book)
+
     book2 = await crud.save_book(db, book)
     print(book2)
     if book2 is None:
@@ -83,29 +82,38 @@ async def post_book(book: schemas.BookSchema,db=Depends(db)):
     return book2
 
 @app.delete('/v1/book/{bookId}' )
-def delete_book(bookId:int,db=Depends(db)):
-    msg = crud.delete_book(db, bookId)
+async def delete_book(bookId:int,db=Depends(db)):
+    msg = await crud.delete_book(db, bookId)
     return msg
 
-@app.get('/v1/book/{bookId}/availability', response_model=List[schemas.BookSchema])
-def read_book(bookId: int, db=Depends(db)):
-    book = crud.get_book_id(db, bookId)
+@app.get('/v1/book/{bookId}/availability') # response_model=List[schemas.BookSchema])
+async def read_book(bookId: int, db=Depends(db)):
+    book = await crud.get_book_id(db, bookId)
     if book is None:
         raise HTTPException(status_code=404, detail="Book not found")
-    return books.amount_in_stock
+    for b in book:
+        amount = b.amount_in_stock
+    return {amount}
 
 ##########################____ORDERS________#################################
 
+@app.post('/v1/order')
+async def post_order(book: schemas.Order,db=Depends(db)):
+    order = await crud.save_order(db, book)
+    if order is None:
+        raise HTTPException(status_code=404, detail="Unknown Book or User id")
+    return order
+'''
 @app.get('/v1/order/{orderId}', response_model=List[schemas.Order])
-def read_order( orderId: int, db=Depends(db)):
+async def read_order( orderId: int, db=Depends(db)):
     order = crud.get_order_id(db, orderId)
     if order is None:
         raise HTTPException(status_code=404, detail="order not found")
     return order
-
-@app.get('/v1/orders', response_model=List[schemas.Order])
-def read_orders( book_id: Optional[int] =None, book_title: Optional[str]=None, requester: Optional[int]=None, status:Optional[str]=None,begin_date:Optional[str]=None,end_date:Optional[str]=None, db=Depends(db),):
-    order = crud.get_orders(db, book_id,book_title, requester, status, begin_date, end_date)
+'''
+@app.get('/v1/orders') # response_model=List[schemas.Order])
+async def read_orders( book_id: Optional[int] =None, book_title: Optional[str]=None, requester: Optional[int]=None, status:Optional[str]=None,begin_date:Optional[str]=None,end_date:Optional[str]=None, db=Depends(db),):
+    order = await crud.get_orders(db, book_id,book_title, requester, status, begin_date, end_date)
     if order is None:
         raise HTTPException(status_code=404, detail="order not found")
     return order
@@ -123,6 +131,22 @@ async def get_author(id: Optional[int] =None, name: Optional[str]=None,db=Depend
 @app.delete('/v1/author/{id}' )
 async def delete_book(id:int,db=Depends(db)):
     msg = await crud.delete_author(db, id)
+    return msg
+
+############################__USERS___########################################################
+
+
+@app.post('/v1/user')
+async def post_user(user: schemas.User,db=Depends(db)):
+    return await crud.save_user(db, user)
+
+@app.get('/v1/user')
+async def get_user(id: Optional[int] =None, db=Depends(db)):
+    return await crud.get_user(db, id)
+
+@app.delete('/v1/user/{id}' )
+async def delete_user(id:int,db=Depends(db)):
+    msg = await crud.delete_user(db, id)
     return msg
 
 #############################__CATEGORIES___#####################################################
