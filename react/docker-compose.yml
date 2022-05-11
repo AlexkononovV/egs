@@ -2,14 +2,11 @@ version: '3.7'
 
 services:
 
-  sample:
+  frontend:
     container_name: react
     build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - '.:/app'
-      - '/app/node_modules'
+      context: react
+      dockerfile: deploy/Dockerfile
     ports:
       - 3001:3000
     environment:
