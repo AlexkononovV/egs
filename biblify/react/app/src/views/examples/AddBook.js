@@ -28,7 +28,7 @@ import {
   
     const handleSubmit = (e) => {
       e.preventDefault();
-      const blog = { book_id, title, date, amount_in_stock, amount_reserved, authors };
+      const blog = { "book_id": book_id, "title": title, "date": date, "amount_in_stock": amount_in_stock, "amount_reserved": amount_reserved, "authors": [{"id": authors, "name":""}],  };
   
       fetch('http://localhost/v1/books', {
         method: 'POST',
@@ -57,7 +57,7 @@ import {
                         </InputGroupText>
                     </InputGroupAddon>
                     <Input 
-                        type="text" 
+                        type="number" 
                         placeholder="Book ID"
                         required 
                         value={book_id}
@@ -111,7 +111,7 @@ import {
                         </InputGroupText>
                     </InputGroupAddon>
                     <Input 
-                        type="text" 
+                        type="number" 
                         placeholder="Amount in Stock"
                         required
                         value={amount_in_stock}
@@ -129,7 +129,7 @@ import {
                         </InputGroupText>
                     </InputGroupAddon>
                     <Input 
-                        type="text" 
+                        type="number" 
                         placeholder="Amount Reserved"
                         required
                         value={amount_reserved}
@@ -147,7 +147,7 @@ import {
                         </InputGroupText>
                     </InputGroupAddon>
                     <Input 
-                        type="text" 
+                        type="number" 
                         placeholder="Authors id"
                         required
                         value={authors}

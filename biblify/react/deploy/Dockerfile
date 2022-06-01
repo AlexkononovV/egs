@@ -18,6 +18,6 @@ COPY ./app /app
 
 EXPOSE 3000
 
-# Start the app
+# Start the app (cmd only to run the container)
 CMD [ "npm", "start" ]
 
