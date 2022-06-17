@@ -16,7 +16,7 @@ COPY ./app /app
 
 # Expose port
 
-EXPOSE 3000
+EXPOSE 8081
 
 # Start the app (cmd only to run the container)
 CMD [ "npm", "start" ]
