@@ -1,5 +1,6 @@
+from click import password_option
 from pydantic import BaseModel
-from typing import Optional
+from typing import Union
 
 class Token(BaseModel):
     access_token: str
@@ -7,12 +8,14 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: str | None = None
+    username: Union[str , None] = None
 
 
 class User(BaseModel):
     username: str
-    email: str | None = None
+    email: str
+
+class UserCreate(User):
     password: str
 
 class UserInDB(User):
