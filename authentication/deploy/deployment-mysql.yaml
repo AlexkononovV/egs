@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-db
+  namespace: egs7
+spec:
+  selector:
+    matchLabels:
+      app: users-db
+  template:
+    metadata:
+      labels:
+        app: users-db
+    spec:
+      containers:
+      - name: users-db
+        image: registry.deti:5000/users-db/authenticationdb:17062022
+        ports:
+        - containerPort: 3306
+          name: users-db
+        volumeMounts:
+          - name: mysql-persistent-storage
+            mountPath: /var/lib/mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: db_password
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: mysql-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-db
+  namespace: egs7
+spec:
+  ports:
+  - port: 3306
+    protocol: TCP
+    name: users-db
+  selector:
+    app: users-db
+  type: NodePort

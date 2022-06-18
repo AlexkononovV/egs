@@ -1,0 +1,51 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentication-api
+  namespace: egs7
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: authentication-api
+  template:
+    metadata:
+      labels:
+        app: authentication-api
+    spec:
+      containers:
+      - name: api
+        image: registry.deti:5000/authentication-api/authenticationapi:17062022
+        resources:
+          requests:
+            memory: "250Mi"
+            cpu: "500m"
+          limits:
+            memory: "500Mi"
+            cpu: "1000m"
+        ports:
+        - containerPort: 8000
+          name: authapi
+        volumeMounts:
+        - name: db-secrets
+          mountPath: "/tmp/secrets"
+          readOnly: true
+      volumes:
+      - name: db-secrets
+        secret:
+          secretName: db-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authentication-api
+  namespace: egs7
+spec:
+  ports:
+  - port: 8000
+    protocol: TCP
+    name: authentication-api
+  selector:
+    app: authentication-api
+  type: NodePort
