@@ -47,7 +47,7 @@ class Tables extends React.Component{
   }
 
   componentDidMount() {
-    axios.get('http://stock:30099/v1/books')
+    axios.get('http://biblify-stock.k3s/v1/books')
       .then(res => {
         const books = res.data;
         this.setState({ books });
