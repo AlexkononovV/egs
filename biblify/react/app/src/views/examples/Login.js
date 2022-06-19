@@ -31,8 +31,36 @@ import {
   Row,
   Col,
 } from "reactstrap";
+import { useState } from "react";
 
 const Login = () => {
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const blog = { "email": email, "password": password};
+
+      
+      
+      let data = localStorage.getItem('credentials');
+      data = JSON.parse(data);
+      console.log(data.email);
+      const email1 = data.email;
+      const password1 = data.password
+
+      if(email1 === blog.email && password1 === blog.password){
+        console.log("LOGEDin");
+        //makes get here
+
+        
+      }
+
+
+  }
+
+
   return (
     <>
       <Col lg="5" md="7">
@@ -82,7 +110,7 @@ const Login = () => {
             <div className="text-center text-muted mb-4">
               <small>Or sign in with credentials</small>
             </div>
-            <Form role="form">
+            <Form onSubmit={handleSubmit}>
               <FormGroup className="mb-3">
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
@@ -91,9 +119,11 @@ const Login = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
+                    type="text" 
                     placeholder="Email"
-                    type="email"
-                    autoComplete="new-email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </InputGroup>
               </FormGroup>
@@ -105,9 +135,11 @@ const Login = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
+                    type="text" 
                     placeholder="Password"
-                    type="password"
-                    autoComplete="new-password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                 </InputGroup>
               </FormGroup>
@@ -125,7 +157,7 @@ const Login = () => {
                 </label>
               </div>
               <div className="text-center">
-                <Button className="my-4" color="primary" type="button">
+                <Button className="my-4" color="primary" type="submit">
                   Sign in
                 </Button>
               </div>

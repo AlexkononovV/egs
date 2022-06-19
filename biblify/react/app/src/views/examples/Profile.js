@@ -33,6 +33,20 @@ import {
 import UserHeader from "components/Headers/UserHeader.js";
 
 const Profile = () => {
+
+  let data = localStorage.getItem('credentials');
+      data = JSON.parse(data);
+      console.log(data.email);
+      const email1 = data.email;
+      //const password1 = data.password
+      const username1 = data.username
+
+      const handleClick = () => {
+
+        console.log("post method to notifications api");
+      }
+    
+
   return (
     <>
       <UserHeader />
@@ -59,23 +73,35 @@ const Profile = () => {
               </Row>
               <CardHeader className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
                 <div className="d-flex justify-content-between">
-                  <Button
-                    className="mr-4"
-                    color="info"
-                    href="#pablo"
-                    onClick={(e) => e.preventDefault()}
-                    size="sm"
-                  >
-                    Connect
-                  </Button>
+                <Row>
+                <Col xs="12">
+                  <div className="custom-control custom-control-alternative custom-checkbox">
+                    <input
+                      className="custom-control-input"
+                      id="customCheckRegister"
+                      type="checkbox"
+                    />
+                    <label
+                      className="custom-control-label"
+                      htmlFor="customCheckRegister"
+                    >
+                      <span className="text-muted">
+                        notifications
+                        <a href="#pablo" onClick={(e) => e.preventDefault()}>
+                        </a>
+                      </span>
+                    </label>
+                  </div>
+                </Col>
+              </Row>
                   <Button
                     className="float-right"
                     color="default"
                     href="#pablo"
-                    onClick={(e) => e.preventDefault()}
+                    onClick={() => handleClick()}
                     size="sm"
                   >
-                    Message
+                    confirm
                   </Button>
                 </div>
               </CardHeader>
@@ -100,30 +126,30 @@ const Profile = () => {
                 </Row>
                 <div className="text-center">
                   <h3>
-                    Jessica Jones
-                    <span className="font-weight-light">, 27</span>
+                    {username1}
+                    <span className="font-weight-light">, 23</span>
                   </h3>
-                  <div className="h5 font-weight-300">
+                  {/* <div className="h5 font-weight-300">
                     <i className="ni location_pin mr-2" />
                     Bucharest, Romania
-                  </div>
+                  </div> */}
                   <div className="h5 mt-4">
                     <i className="ni business_briefcase-24 mr-2" />
-                    Solution Manager - Creative Tim Officer
+                    EGS - DETI
                   </div>
                   <div>
                     <i className="ni education_hat mr-2" />
-                    University of Computer Science
+                    University of Aveiro
                   </div>
                   <hr className="my-4" />
-                  <p>
+                  {/* <p>
                     Ryan — the name taken by Melbourne-raised, Brooklyn-based
                     Nick Murphy — writes, performs and records all of his own
                     music.
                   </p>
                   <a href="#pablo" onClick={(e) => e.preventDefault()}>
                     Show more
-                  </a>
+                  </a> */}
                 </div>
               </CardBody>
             </Card>
@@ -164,7 +190,7 @@ const Profile = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="lucky.jesse"
+                            defaultValue = {username1}
                             id="input-username"
                             placeholder="Username"
                             type="text"
@@ -182,13 +208,13 @@ const Profile = () => {
                           <Input
                             className="form-control-alternative"
                             id="input-email"
-                            placeholder="jesse@example.com"
-                            type="email"
+                            placeholder={email1}
+                            type="text"
                           />
                         </FormGroup>
                       </Col>
                     </Row>
-                    <Row>
+                    {/* <Row>
                       <Col lg="6">
                         <FormGroup>
                           <label
@@ -223,7 +249,7 @@ const Profile = () => {
                           />
                         </FormGroup>
                       </Col>
-                    </Row>
+                    </Row> */}
                   </div>
                   <hr className="my-4" />
                   {/* Address */}
@@ -242,7 +268,7 @@ const Profile = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="Bld Mihail Kogalniceanu, nr. 8 Bl 1, Sc 1, Ap 09"
+                            defaultValue=""
                             id="input-address"
                             placeholder="Home Address"
                             type="text"
@@ -261,7 +287,7 @@ const Profile = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="New York"
+                            defaultValue=""
                             id="input-city"
                             placeholder="City"
                             type="text"
@@ -278,7 +304,7 @@ const Profile = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="United States"
+                            defaultValue=""
                             id="input-country"
                             placeholder="Country"
                             type="text"
@@ -307,7 +333,7 @@ const Profile = () => {
                   {/* Description */}
                   <h6 className="heading-small text-muted mb-4">About me</h6>
                   <div className="pl-lg-4">
-                    <FormGroup>
+                    {/* <FormGroup>
                       <label>About Me</label>
                       <Input
                         className="form-control-alternative"
@@ -317,7 +343,7 @@ const Profile = () => {
                         Open Source."
                         type="textarea"
                       />
-                    </FormGroup>
+                    </FormGroup> */}
                   </div>
                 </Form>
               </CardBody>

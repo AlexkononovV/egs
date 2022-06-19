@@ -30,7 +30,7 @@ import {
       e.preventDefault();
       const blog = { "book_id": book_id, "title": title, "date": date, "amount_in_stock": amount_in_stock, "amount_reserved": amount_reserved, "authors": [{"id": authors, "name":""}],  };
   
-      fetch('http://localhost/v1/books', {
+      fetch('stock/v1/books', {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(blog)
