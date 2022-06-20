@@ -6,7 +6,7 @@ metadata:
   name: biblify-frontend
   namespace: egs7
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: biblify-frontend

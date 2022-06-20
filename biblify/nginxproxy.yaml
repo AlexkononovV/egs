@@ -36,7 +36,19 @@ spec:
                - key: nginx.conf
                  path: nginx.conf
 
-
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: egs7
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: nginx
+---
 
 apiVersion: networking.k8s.io/v1
 kind: Ingress

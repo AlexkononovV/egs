@@ -1,5 +1,3 @@
-After clone do this to run:
+run ./setup.sh
 
-cd fastApi
 
-sudo docker-compose up --build
