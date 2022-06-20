@@ -21,6 +21,7 @@ import AddBook from "views/examples/AddBook.js";
 import Register from "views/examples/Register.js";
 import Login from "views/examples/Login.js";
 import Tables from "views/examples/Tables.js";
+import DeleteBook from "views/examples/DeleteBook.js";
 //import Icons from "views/examples/Icons.js";
 
 var routes = [
@@ -34,7 +35,7 @@ var routes = [
   {
     path: "/tables",
     name: "Books",
-    icon: "ni ni-bullet-list-67 text-red",
+    icon: "ni ni-books text-red",
     component: Tables,
     layout: "/admin",
   },
@@ -43,6 +44,13 @@ var routes = [
     name: "Add a Book",
     icon: "ni ni-ui-04 text-green",
     component: AddBook,
+    layout: "/admin",
+  },
+  {
+    path: "/delete-book",
+    name: "Delete a Book",
+    icon: "ni ni-fat-remove text-red",
+    component: DeleteBook,
     layout: "/admin",
   },
   {
