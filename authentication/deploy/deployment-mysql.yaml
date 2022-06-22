@@ -15,21 +15,24 @@ spec:
     spec:
       containers:
       - name: users-db
-        image: registry.deti:5000/users-db/authenticationdb:17062022
+        image: registry.deti:5000/biblify/db-users:21062022
         ports:
         - containerPort: 3306
           name: users-db
         volumeMounts:
-          - name: mysql-persistent-storage
+          - name: mysql-pv-claim
             mountPath: /var/lib/mysql
         env:
+        - name: MYSQL_DATABASE
+          value: users
         - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-secrets
-              key: db_password
+          value: root
+        - name: MYSQL_USER
+          value: rodrigo
+        - name: MYSQL_PASSWORD
+          value: password
       volumes:
-        - name: mysql-persistent-storage
+        - name: mysql-pv-claim
           persistentVolumeClaim:
             claimName: mysql-pv-claim
 ---
@@ -46,3 +49,17 @@ spec:
   selector:
     app: users-db
   type: NodePort
+  
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  namespace: egs7
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 500Mi 

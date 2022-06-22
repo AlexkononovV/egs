@@ -4,3 +4,7 @@ passlib[bcrypt]
 python-jose[cryptography]
 pydantic
 SQLAlchemy
+mysql
+mysql-connector-python-rf
+mysql-connector-python
+python-multipart
