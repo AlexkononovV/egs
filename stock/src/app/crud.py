@@ -6,12 +6,14 @@ from sqlalchemy.future import select
 from sqlalchemy import delete
 from sqlalchemy.orm import selectinload,joinedload
 
-async def get_books(db:Session, title: str=None, author: str = None):
+async def get_books(db:Session, title: str=None, author: str = None, id: int = None):
     #return db.query(models.Book).filter(models.Book.title == title).filter(models.Book.categories_id == category).filter(models.Book.authors_id == author)
     
     #books = db.query(models.Book).all()
     query = select(models.Book).options(joinedload(models.Book.authors))
-    books = await db.execute(select(models.Book).options(joinedload(models.Book.authors)))    
+    books = await db.execute(select(models.Book).options(joinedload(models.Book.authors)))  
+    if id is not None:
+        query = select(models.Book).options(joinedload(models.Book.authors)).where(models.Book.book_id == id)
     if title is not None:
         query = select(models.Book).options(joinedload(models.Book.authors)).where(models.Book.title.contains(title))
     books = await db.execute(query)

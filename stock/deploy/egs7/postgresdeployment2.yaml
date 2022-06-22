@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: egs7
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: stock-db
+          image: registry.deti:5000/alexey/postgres:15061
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-user-pass
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-user-pass
+                  key: password
+            - name: POSTGRES_DB
+              value: "stock"
+            - name: PGDATA
+              value: /var/lib/postgresql/data/stock
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgresdb
+  volumeClaimTemplates:
+  - metadata:
+    name: postgresql-db-disk
+    namespace:  egs7
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 25Gi
+
+
+

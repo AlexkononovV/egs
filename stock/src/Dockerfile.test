@@ -1,8 +1,0 @@
-FROM python:3.7
-RUN pip3 install --no-cache-dir requests
-WORKDIR /home
-#CMD ["bash"]
-COPY ./apitest.py ./apitest.py
-EXPOSE 31311
-CMD ["python3", "apitest.py"]
-

@@ -17,11 +17,17 @@ from sqlalchemy.orm import sessionmaker
 
 from starlette.middleware.cors import CORSMiddleware
 
-import asyncio
-
 #models.Base.metadata.create_all(bind=engine)
 
+app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 async def init_db():
     async with engine.begin() as conn:
@@ -46,39 +52,27 @@ async def db() -> AsyncSession:
 '''
 
 
-loop = asyncio.get_event_loop()
-task = loop.create_task(init_db())
-#loop.run_until_complete(asyncio.wait(task))
-#loop.close()
-
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+#init_db()
 
 ###############____BOOKS___#############################################
 
-@app.get('/v1/books')#, response_model=List[schemas.Book])
-async def read_books(db=Depends(db), title: Optional[str] = None, author:Optional[str]=None):
-    books = await crud.get_books(db, title=title, author=author)
+@app.get('/v1/book')#, response_model=List[schemas.Book])
+async def read_books(db=Depends(db), title: Optional[str] = None, author:Optional[str]=None, id:Optional[int]=None):
+    books = await crud.get_books(db, title=title, author=author, id=id)
     if books is None:
         raise HTTPException(status_code=404, detail="Books not found")
     
     return books
 
+'''
 @app.get('/v1/book/{bookId}')#, response_model=List[schemas.Book])
 async def read_book( bookId: int,db=Depends(db)):
     book = await crud.get_book_id(db, id=bookId)
     if book is None:
         raise HTTPException(status_code=404, detail="Book not found")
     return book
-
-@app.post('/v1/books')
+'''
+@app.post('/v1/book')
 #def save_books(db=Depends(db), book_id: int, name: str,mount_in_stock:int, amount_reserved: int,date:Optional[str], authors: List[schemas.Author], categories:List[schemas.Category], orders: Optional[List[schemas.Order]] ):
 async def post_book(book: schemas.BookSchema,db=Depends(db)):
 
@@ -92,7 +86,7 @@ async def post_book(book: schemas.BookSchema,db=Depends(db)):
 async def delete_book(bookId:int,db=Depends(db)):
     msg = await crud.delete_book(db, bookId)
     return msg
-
+'''
 @app.get('/v1/book/{bookId}/availability') # response_model=List[schemas.BookSchema])
 async def read_book(bookId: int, db=Depends(db)):
     book = await crud.get_book_id(db, bookId)
@@ -101,7 +95,7 @@ async def read_book(bookId: int, db=Depends(db)):
     for b in book:
         amount = b.amount_in_stock
     return {amount}
-
+'''
 ##########################____ORDERS________#################################
 
 @app.post('/v1/order')
@@ -118,7 +112,7 @@ async def read_order( orderId: int, db=Depends(db)):
         raise HTTPException(status_code=404, detail="order not found")
     return order
 '''
-@app.get('/v1/orders') # response_model=List[schemas.Order])
+@app.get('/v1/order') # response_model=List[schemas.Order])
 async def read_orders( book_id: Optional[int] =None, book_title: Optional[str]=None, requester: Optional[int]=None, status:Optional[str]=None,begin_date:Optional[str]=None,end_date:Optional[str]=None, db=Depends(db),):
     order = await crud.get_orders(db, book_id,book_title, requester, status, begin_date, end_date)
     if order is None:
