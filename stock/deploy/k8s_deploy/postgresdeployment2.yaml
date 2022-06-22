@@ -1,7 +1,7 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: postgres
+  name: postgres2
   namespace: egs7
 spec:
   replicas: 1
@@ -36,15 +36,12 @@ spec:
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: postgresdb
-  volumeClaimTemplates:
-  - metadata:
-    name: postgresql-db-disk
-    namespace:  egs7
-    spec:
-      accessModes: ["ReadWriteOnce"]
-      resources:
-        requests:
-          storage: 25Gi
+      volumes:
+        - name: postgresdb
+          persistentVolumeClaim:
+            claimName: postgres-biblify2-pvc
+
+
 
 
 

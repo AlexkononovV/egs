@@ -17,17 +17,10 @@ from sqlalchemy.orm import sessionmaker
 
 from starlette.middleware.cors import CORSMiddleware
 
-#models.Base.metadata.create_all(bind=engine)
+import asyncio
 
-app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
 
 async def init_db():
     async with engine.begin() as conn:
@@ -42,17 +35,19 @@ async def db() -> AsyncSession:
         yield db
 
 
-# Dependency
-'''def db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-'''
 
+loop = asyncio.get_event_loop()
+task = loop.create_task(init_db())
 
-#init_db()
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 ###############____BOOKS___#############################################
 
@@ -64,16 +59,8 @@ async def read_books(db=Depends(db), title: Optional[str] = None, author:Optiona
     
     return books
 
-'''
-@app.get('/v1/book/{bookId}')#, response_model=List[schemas.Book])
-async def read_book( bookId: int,db=Depends(db)):
-    book = await crud.get_book_id(db, id=bookId)
-    if book is None:
-        raise HTTPException(status_code=404, detail="Book not found")
-    return book
-'''
+
 @app.post('/v1/book')
-#def save_books(db=Depends(db), book_id: int, name: str,mount_in_stock:int, amount_reserved: int,date:Optional[str], authors: List[schemas.Author], categories:List[schemas.Category], orders: Optional[List[schemas.Order]] ):
 async def post_book(book: schemas.BookSchema,db=Depends(db)):
 
     book2 = await crud.save_book(db, book)
@@ -86,16 +73,7 @@ async def post_book(book: schemas.BookSchema,db=Depends(db)):
 async def delete_book(bookId:int,db=Depends(db)):
     msg = await crud.delete_book(db, bookId)
     return msg
-'''
-@app.get('/v1/book/{bookId}/availability') # response_model=List[schemas.BookSchema])
-async def read_book(bookId: int, db=Depends(db)):
-    book = await crud.get_book_id(db, bookId)
-    if book is None:
-        raise HTTPException(status_code=404, detail="Book not found")
-    for b in book:
-        amount = b.amount_in_stock
-    return {amount}
-'''
+
 ##########################____ORDERS________#################################
 
 @app.post('/v1/order')
@@ -104,14 +82,7 @@ async def post_order(book: schemas.Order,db=Depends(db)):
     if order is None:
         raise HTTPException(status_code=404, detail="Unknown Book or User id")
     return order
-'''
-@app.get('/v1/order/{orderId}', response_model=List[schemas.Order])
-async def read_order( orderId: int, db=Depends(db)):
-    order = crud.get_order_id(db, orderId)
-    if order is None:
-        raise HTTPException(status_code=404, detail="order not found")
-    return order
-'''
+
 @app.get('/v1/order') # response_model=List[schemas.Order])
 async def read_orders( book_id: Optional[int] =None, book_title: Optional[str]=None, requester: Optional[int]=None, status:Optional[str]=None,begin_date:Optional[str]=None,end_date:Optional[str]=None, db=Depends(db),):
     order = await crud.get_orders(db, book_id,book_title, requester, status, begin_date, end_date)
@@ -150,19 +121,4 @@ async def delete_user(id:int,db=Depends(db)):
     msg = await crud.delete_user(db, id)
     return msg
 
-#############################__CATEGORIES___#####################################################
-'''
-@app.post('/v1/category') #, response_model=schemas.Category)
-async def post_category(cat: schemas.Category,db=Depends(db)):
 
-    return await crud.save_category(db, cat)
-
-@app.get('/v1/category') #, response_model=List[schemas.Category])
-async def get_category(id: Optional[int] =None, name: Optional[str]=None,db=Depends(db)):
-    return await crud.get_category(db, name, id)
-
-@app.delete('/v1/category/{id}' )
-async def delete_book(id:int,db=Depends(db)):
-    msg = await crud.delete_category(db, id)
-    return msg
-'''

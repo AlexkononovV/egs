@@ -14,20 +14,7 @@ class AuthorBase(BaseModel):
     class Config:
         orm_mode = True
 
-'''class Category(BaseModel):
 
-    id: int
-    name: str
-    class Config:
-        orm_mode = True
-'''
-'''class Publisher(BaseModel):
-
-    id: int
-    name: str
-    class Config:
-        orm_mode = True
-'''
 class User(BaseModel):
 
     user_id: int 

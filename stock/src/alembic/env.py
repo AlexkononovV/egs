@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 import sys
 from os import path
 #sys.path.append( path.dirname( path.dirname( path.abspath(__file__) ) ) )
+import os
 
 parent_dir = os.path.abspath(os.path.join(os.getcwd()))
 sys.path.append(parent_dir)
