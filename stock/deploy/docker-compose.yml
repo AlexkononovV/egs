@@ -34,11 +34,6 @@ services:
       context: ../src
       dockerfile: Dockerfile
     command: bash -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --reload"
-    #volumes:
-    #  - .:/usr/src/book_stock
-    #ports:
-    #  - 80:80
-    #new
     expose:
       - 8000
     depends_on:
@@ -53,5 +48,4 @@ networks:
   nginx_network:
     driver: bridge
 
-#volumes:
-#  postgres_data:
+
