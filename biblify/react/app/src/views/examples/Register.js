@@ -41,13 +41,13 @@ const Register = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const blog = { "email": email, "password": password};
+    //const blog = { "email": email, "password": password};
     const blog1 = {"username": username, "email": email, "password": password};
 
-    fetch('', { //colocar o localhost do serviço
+    fetch('http://biblify-auth.k3s/users', { //colocar o localhost do serviço
       method: 'POST',
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(blog)
+      body: JSON.stringify(blog1)
     }).then(() => {
       console.log('new user added');
       
